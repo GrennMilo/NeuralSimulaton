@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="control-panel">
+            <div class="settings">
+                <div class="setting">
+                    <label for="epoch">Epoch</label>
+                    <div class="value-display">
+                        <span id="epoch-value">0</span>
+                    </div>
+                </div>
+                <div class="setting">
+                    <label for="learning-rate">Learning rate</label>
+                    <input type="number" id="learning-rate" min="0.001" max="1" step="0.001" value="0.03">
+                </div>
+                <div class="setting">
+                    <label for="activation">Activation</label>
+                    <select id="activation">
+                        <option value="relu" selected>ReLU</option>
+                        <option value="sigmoid">Sigmoid</option>
+                        <option value="tanh">Tanh</option>
+                    </select>
+                </div>
+                <div class="setting">
+                    <label for="regularization">Regularization</label>
+                    <select id="regularization">
+                        <option value="none" selected>None</option>
+                        <option value="l1">L1</option>
+                        <option value="l2">L2</option>
+                    </select>
+                </div>
+                <div class="setting">
+                    <label for="regularization-rate">Regularization rate</label>
+                    <input type="number" id="regularization-rate" min="0" max="1" step="0.01" value="0">
+                </div>
+                <div class="setting">
+                    <label for="problem-type">Problem type</label>
+                    <select id="problem-type">
+                        <option value="classification" selected>Classification</option>
+                        <option value="regression">Regression</option>
+                    </select>
+                </div>
+            </div>
+            <div class="playback-controls">
+                <button id="reset" class="control-btn" title="Reset Network"><svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg></button>
+                <button id="play" class="control-btn" title="Play/Pause Training"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+                <button id="step" class="control-btn" title="Step Forward One Epoch"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="data-column">
+                <h3>DATA</h3>
+                <div class="data-selection">
+                    <p>Which dataset do you want to use?</p>
+                    <div class="dataset-options">
+                        <div class="dataset selected" data-set="circle">
+                            <canvas id="circle-preview" width="60" height="60"></canvas>
+                        </div>
+                        <div class="dataset" data-set="spiral">
+                            <canvas id="spiral-preview" width="60" height="60"></canvas>
+                        </div>
+                        <div class="dataset" data-set="xor">
+                            <canvas id="xor-preview" width="60" height="60"></canvas>
+                        </div>
+                        <div class="dataset" data-set="gaussian">
+                            <canvas id="gaussian-preview" width="60" height="60"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-parameters">
+                    <div class="parameter">
+                        <label for="train-ratio">Ratio of training to test data: <span id="train-ratio-value">50%</span></label>
+                        <input type="range" id="train-ratio" min="10" max="90" value="50" title="Training to test data ratio">
+                    </div>
+                    <div class="parameter">
+                        <label for="noise">Noise: <span id="noise-value">0</span></label>
+                        <input type="range" id="noise" min="0" max="50" value="0" title="Noise level">
+                    </div>
+                    <div class="parameter">
+                        <label for="batch-size">Batch size: <span id="batch-size-value">10</span></label>
+                        <input type="range" id="batch-size" min="1" max="30" value="10" title="Training batch size">
+                    </div>
+                </div>
+                <button id="regenerate" class="action-btn">REGENERATE</button>
+            </div>
+            
+            <div class="features-column">
+                <h3>FEATURES</h3>
+                <p>Which properties do you want to feed in?</p>
+                <div class="feature-options">
+                    <div class="feature">
+                        <label>X₁</label>
+                        <canvas id="x1-preview" width="40" height="40"></canvas>
+                    </div>
+                    <div class="feature">
+                        <label>X₂</label>
+                        <canvas id="x2-preview" width="40" height="40"></canvas>
+                    </div>
+                    <div class="feature">
+                        <label>X₁²</label>
+                        <canvas id="x1-squared-preview" width="40" height="40"></canvas>
+                    </div>
+                    <div class="feature">
+                        <label>X₂²</label>
+                        <canvas id="x2-squared-preview" width="40" height="40"></canvas>
+                    </div>
+                    <div class="feature">
+                        <label>X₁X₂</label>
+                        <canvas id="x1x2-preview" width="40" height="40"></canvas>
+                    </div>
+                    <div class="feature">
+                        <label>sin(X₁)</label>
+                        <canvas id="sin-x1-preview" width="40" height="40"></canvas>
+                    </div>
+                    <div class="feature">
+                        <label>sin(X₂)</label>
+                        <canvas id="sin-x2-preview" width="40" height="40"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="network-column">
+                <div class="layer-controls">
+                    <button id="add-layer" class="layer-btn">+</button>
+                    <button id="remove-layer" class="layer-btn">-</button>
+                    <span><span id="layer-count">2</span> HIDDEN LAYERS</span>
+                </div>
+                <div id="network-architecture" class="network-visualization">
+                    <!-- Network architecture will be rendered here by JS -->
+                </div>
+                <div class="function-display">
+                    <h2>f(x, y) = z</h2>
+                </div>
+            </div>
+            
+            <div class="output-column">
+                <h3>OUTPUT</h3>
+                <div class="output-display">
+                    <div class="output-stat">Test loss <span id="test-loss">0.483</span></div>
+                    <div class="output-stat">Training loss <span id="training-loss">0.483</span></div>
+                </div>
+                <div id="output-visualization" class="visualization-container">
+                    <!-- Output visualization will be rendered here -->
+                </div>
+                <div class="color-legend">
+                    <p>Colors shows data, neuron and weight values.</p>
+                    <div class="gradient-bar">
+                        <span class="gradient-label">-1</span>
+                        <div class="gradient"></div>
+                        <span class="gradient-label">0</span>
+                        <div class="gradient"></div>
+                        <span class="gradient-label">1</span>
+                    </div>
+                </div>
+                <div class="output-options">
+                    <label>
+                        <input type="checkbox" id="show-test-data"> Show test data
+                    </label>
+                    <label>
+                        <input type="checkbox" id="discretize-output"> Discretize output
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html> 
